@@ -5,6 +5,7 @@
  */
 package org.clas.analysis;
 
+import javax.swing.JFrame;
 import org.jlab.groot.data.DataLine;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
@@ -113,7 +114,7 @@ public class Data {
         return dgFMT;
     }
 
-    public static EmbeddedCanvasTabbed drawPlots(DataGroup[] dgFMT, int cn,
+    public static int drawPlots(DataGroup[] dgFMT, int cn,
             String[] titleArr, boolean[] pltLArr) {
 
         EmbeddedCanvasTabbed fmtCanvas = new EmbeddedCanvasTabbed(titleArr);
@@ -166,6 +167,12 @@ public class Data {
             }
         }
 
-        return fmtCanvas;
+        JFrame frame = new JFrame("FMT");
+        frame.setSize(1600, 1000);
+        frame.add(fmtCanvas);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+        return 0;
     }
 }

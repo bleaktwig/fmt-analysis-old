@@ -26,20 +26,21 @@ public class Main {
         String infile = args[0];
 
         // Setup
-        double[] zShArr   = new double[]{-5, -4, -3};
+        double[] zShArr   = new double[]{-5};
         int pltRan        = 10;
         int gssRan        = 8;
         boolean[] pltLArr = new boolean[]{true, true, false, false};
         double[] swmSetup = new double[]{-0.75, -1.0, -3.0};
         boolean dbgInfo   = true;
-        boolean testRun   = true;
+        boolean testRun   = false;
 
         TrkSwim trkSwim = new TrkSwim(swmSetup);
         ResolutionAnalysis resAnls =
                 new ResolutionAnalysis(infile, pltLArr, dbgInfo, testRun);
 
         // Run
-        resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
+        // resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
+        resAnls.dcSectorAnalysis(-5, pltRan, gssRan, trkSwim);
 
         return;
     }
