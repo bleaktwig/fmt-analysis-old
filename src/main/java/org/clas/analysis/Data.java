@@ -58,13 +58,13 @@ public class Data {
     }
 
     /**
-     * Get the omega of a distribution.
+     * Get the sigma of a distribution.
      * @param hires : 1-dimensional residuals distribution.
      * @param mean  : mean of the distribution.
-     * @return omega of hires.
+     * @return sigma of hires.
      */
-    public static double getOmega(H1F hires, double mean) {
-        double omega = 0.0;
+    public static double getSigma(H1F hires, double mean) {
+        double sigma = 0.0;
         double summ  = 0.0;
         double count = 0;
         for (int i=0; i < hires.getAxis().getNBins(); ++i) {
@@ -72,9 +72,9 @@ public class Data {
             summ  += val*val;
             count += hires.getBinContent(i);
         }
-        if (count != 0) omega = Math.sqrt(summ/(count-1));
+        if (count != 0) sigma = Math.sqrt(summ/(count-1));
 
-        return omega;
+        return sigma;
     }
 
     /**

@@ -359,8 +359,8 @@ public class ResolutionAnalysis {
 
         double[] absMeanArr    = new double[zn];
         double[] absMeanErrArr = new double[zn];
-        double[] omegaArr     = new double[zn];
-        double[] omegaErrArr  = new double[zn];
+        double[] sigmaArr     = new double[zn];
+        double[] sigmaErrArr  = new double[zn];
 
         // === RUN =============================================================
         for (int zi=0; zi<zn; ++zi) {
@@ -371,14 +371,14 @@ public class ResolutionAnalysis {
                 F1D func = dgFMT[zi].getF1D("f1_res_l"+li);
                 absMeanArr[zi]    += Math.abs(func.getParameter(1));
                 absMeanErrArr[zi] += func.parameter(1).error();
-                omegaArr[zi]      += func.getParameter(2);
-                omegaErrArr[zi]   += func.parameter(2).error();
+                sigmaArr[zi]      += func.getParameter(2);
+                sigmaErrArr[zi]   += func.parameter(2).error();
             }
 
             absMeanArr[zi]    /= ln;
             absMeanErrArr[zi] /= ln;
-            omegaArr[zi]     /= ln;
-            omegaErrArr[zi]  /= ln;
+            sigmaArr[zi]     /= ln;
+            sigmaErrArr[zi]  /= ln;
         }
 
         // === PRINT ALIGNMENT DATA AND DRAW PLOTS =============================
@@ -386,8 +386,8 @@ public class ResolutionAnalysis {
             System.out.printf("z shift : %5.2f\n", zShArr[zi]);
             System.out.printf("  * |mean| : %9.6f +- %9.6f\n",
                     absMeanArr[zi], absMeanErrArr[zi]);
-            System.out.printf("  * omega  : %9.6f +- %9.6f\n",
-                    omegaArr[zi], omegaErrArr[zi]);
+            System.out.printf("  * sigma  : %9.6f +- %9.6f\n",
+                    sigmaArr[zi], sigmaErrArr[zi]);
         }
 
         Data.drawResPlots(dgFMT, zn, titleArr, pltLArr);
