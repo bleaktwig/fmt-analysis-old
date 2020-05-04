@@ -26,7 +26,7 @@ public class Main {
         String infile = args[0];
 
         // Setup
-        double[] zShArr   = new double[]{-5};
+        double[] zShArr   = new double[]{-4.25};
         int pltRan        = 10;
         int gssRan        = 8;
         boolean[] pltLArr = new boolean[]{true, true, false, false};
@@ -39,8 +39,12 @@ public class Main {
                 new ResolutionAnalysis(infile, pltLArr, dbgInfo, testRun);
 
         // Run
-        // resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
-        resAnls.dcSectorAnalysis(-5, pltRan, gssRan, trkSwim);
+        resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
+        // resAnls.dcSectorStripAnalysis(zShArr[0], pltRan, gssRan, trkSwim);
+        // resAnls.dcSectorThetaAnalysis(zShArr[0], pltRan, gssRan, trkSwim);
+        // resAnls.plot1DCount(0, 1000);
+        // resAnls.plot1DCount(1, 2000);
+        // resAnls.plot2DCount(0, -1);
 
         return;
     }
