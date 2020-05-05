@@ -10,6 +10,12 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.*;
 import org.jlab.groot.math.F1D;
 
+// Temporary because I'm lazy
+import org.jlab.groot.data.DataLine;
+import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.H2F;
+
+
 public class ResolutionAnalysis {
     // Constants:
     final int ln = 3;  // Number of FMT layers.
@@ -437,6 +443,126 @@ public class ResolutionAnalysis {
         DataGroup[] dgFMT = Data.createResDataGroups(type, ln, sn, r);
         runAnalysis(type, sn, swim, dgFMT, zSh, g);
         Data.drawResPlots(dgFMT, sn, titleArr, pltLArr);
+
+        return 0;
+    }
+
+    public int fmtRegionAnalysis(double zSh, int r, TrkSwim swim) {
+        int type = 3;
+        // Set canvases' stuff.
+        int rn = 4; // Number of FMT regions
+        int[] iStrip = new int[]{-1, 319, 511, 831, 1023};
+        String title = "FMT regions";
+
+        // Create data groups.
+        DataGroup[] dgFMT = Data.createFMTRegionsDataGroup(ln, rn, iStrip, r);
+
+        // Run.
+        int[] trackStopCount   = new int[]{0, 0, 0, 0, 0, 0};
+        int[] clusterStopCount = new int[]{0, 0, 0, 0, 0};
+        int ei = 0; // Event number.
+        HipoDataSource reader = new HipoDataSource();
+        reader.open(infile);
+        System.out.printf("\nRunning analysis...\n");
+
+        // Loop through events.
+        while (reader.hasEvent()) {
+            if (ei == 10000 && testRun) break;
+            if (ei%50000==0) System.out.format("Analyzed %8d events...\n", ei);
+            DataEvent event = reader.getNextEvent();
+            ei++;
+
+            // Get relevant data banks.
+            DataBank clusters = getBank(event, "FMTRec::Clusters");
+            DataBank traj     = getBank(event, "REC::Traj");
+            DataBank particle = getBank(event, "REC::Particle");
+            if (clusters==null || traj==null || particle==null) continue;
+
+            // Loop through trajectory points.
+            for (int tri=0; tri<traj.rows(); tri++) {
+                // Load trajectory variables.
+                int detector = traj.getByte("detector", tri);
+                int li = traj.getByte("layer", tri);
+                int pi = traj.getShort("pindex", tri);
+                double costh = -1; // track theta.
+
+                // Use only FMT layers 1, 2, and 3.
+                if (detector!=DetectorType.FMT.getDetectorId() || li<1 || li>ln)
+                    continue;
+
+                trackStopCount[0]++;
+
+                // Get FMT layer's z coordinate and phi angle.
+                double zRef = fmtZ[li-1]/10 + zSh;
+                double phiRef = fmtAngle[li-1];
+
+                // Get particle data.
+                double x  = (double) particle.getFloat("vx", pi);
+                double y  = (double) particle.getFloat("vy", pi);
+                double z  = (double) particle.getFloat("vz", pi);
+                double px = (double) particle.getFloat("px", pi);
+                double py = (double) particle.getFloat("py", pi);
+                double pz = (double) particle.getFloat("pz", pi);
+                int q     = (int)    particle.getByte("charge", pi);
+
+                // Check if the track is too downstream before swimming.
+                if (z > zRef) {
+                    trackStopCount[1]++;
+                    continue;
+                }
+
+                double[] V = swim.swimToPlane(x,y,z,px,py,pz,q,zRef);
+
+                x  = V[0];
+                y  = V[1];
+                z  = V[2];
+                px = V[3];
+                py = V[4];
+                pz = V[5];
+
+                // Get the track's theta angle.
+                costh = Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz));
+
+                // Apply track fiducial cuts.
+                if (checkTrackCuts(z, x, y, zRef, costh, trackStopCount)) continue;
+
+                // Rotate (x,y) to local coordinates.
+                double xLoc = x * Math.cos(Math.toRadians(phiRef))
+                        + y * Math.sin(Math.toRadians(phiRef));
+                double yLoc = y * Math.cos(Math.toRadians(phiRef))
+                        - x * Math.sin(Math.toRadians(phiRef));
+
+                // Loop over the clusters and calculate residuals for every
+                // track-cluster combination.
+                for (int cri=0; cri<clusters.rows(); cri++) {
+                    // Check that the cluster and trajectory layers match.
+                    if (li!=clusters.getByte("layer", cri)) continue;
+                    clusterStopCount[0]++;
+                    int strip     = clusters.getInt("seedStrip", cri);
+                    int size      = clusters.getShort("size", cri);
+                    double energy = clusters.getFloat("ETot", cri);
+                    double tmin   = clusters.getFloat("Tmin", cri);
+                    double yclus  = clusters.getFloat("centroid", cri);
+
+                    // Apply cluster fiducial cuts.
+                    if (checkClusterCuts(strip, size, energy, tmin, clusterStopCount))
+                        continue;
+
+                    // Update plots.
+                    for (int ri=0; ri<=rn; ++ri) {
+                        if (iStrip[ri]+1 <= strip && strip <= iStrip[ri+1]) {
+                            dgFMT[0].getH2F("hi_cluster_res_strip_l" + (rn*(li-1)+ri)).fill(yLoc-yclus, strip);
+                        }
+                    }
+                }
+            }
+        }
+        System.out.format("Analyzed %8d events... Done!\n", ei);
+        reader.close();
+
+        if (debugInfo) printDebugInfo(trackStopCount, clusterStopCount);
+
+        Data.drawPlots(dgFMT, title);
 
         return 0;
     }

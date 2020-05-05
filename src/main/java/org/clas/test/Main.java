@@ -39,12 +39,13 @@ public class Main {
                 new ResolutionAnalysis(infile, pltLArr, dbgInfo, testRun);
 
         // Run
-        resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
+        // resAnls.zShiftAnalysis(zShArr, pltRan, gssRan, trkSwim);
         // resAnls.dcSectorStripAnalysis(zShArr[0], pltRan, gssRan, trkSwim);
         // resAnls.dcSectorThetaAnalysis(zShArr[0], pltRan, gssRan, trkSwim);
         // resAnls.plot1DCount(0, 1000);
         // resAnls.plot1DCount(1, 2000);
         // resAnls.plot2DCount(0, -1);
+        resAnls.fmtRegionAnalysis(zShArr[0], pltRan, trkSwim);
 
         return;
     }

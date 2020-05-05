@@ -129,6 +129,28 @@ public class Data {
         return dgFMT;
     }
 
+    public static DataGroup[] createFMTRegionsDataGroup(int ln, int rn,
+            int[] iStrip, int r) {
+
+        DataGroup[] dgFMT = new DataGroup[1];
+
+        dgFMT[0] = new DataGroup(4,3);
+        for (int li=0; li<ln; ++li) {
+            for (int ri=0; ri<rn; ++ri) {
+                H2F hi_cluster_res_strip = new H2F(
+                        "hi_cluster_res_strip_l"+(rn*li+ri), 200, -r, r,
+                        iStrip[ri+1]-iStrip[ri], iStrip[ri]+1, iStrip[ri+1]
+                );
+                hi_cluster_res_strip.setTitleX("Residual (cm) - L "+(li+1)+", R "+(ri+1));
+                hi_cluster_res_strip.setTitleY("Strips");
+
+                dgFMT[0].addDataSet(hi_cluster_res_strip, rn*li+ri);
+            }
+        }
+
+        return dgFMT;
+    }
+
     /**
      * Render plots for a set of data groups.
      * @param dgFMT : Array of data groups.
